@@ -1,31 +1,37 @@
-program whereStatement
+program pointerExample
 implicit none
 
-	integer :: a(3, 5), i, j
+	integer, pointer :: p1
+	integer, target :: t1
+	integer, target :: t2
 
-	do i = 1, 3
-		do j = 1, 5
-			a(i, j) = j - i
-		end do
-	end do
+	p1=>t1
+	p1 = 1
 
-	print *, "ARRAY A:"
+	print *, p1
+	print *, t1
 
-	do i = lbound(a, 1), ubound(a, 1)
-		write(*, *) (a(i, j), j = lbound(a, 2), ubound(a, 2))
-	end do
+	p1 = p1 + 4
+	print *, p1
+	print *, t1
 
-	where (a < 0)
-		a = 1
-	elsewhere (a == 0)
-		a = 5
-	elsewhere
-		a = 99
-	end where
+	t1 = 8
+	print *, p1
+	print *, t1
 
-	print *, "NEW ARRAY A:"
-	do i = lbound(a, 1), ubound(a, 1)
-		write(*, *) (a(i, j), j = lbound(a, 2), ubound(a, 2))
-	end do
+	nullify(p1)
+	print *, t1
 
-end program whereStatement
+	p1=>t2
+	print *, associated(p1)
+	print *, associated(p1, t1)
+	print *, associated(p1, t2)
+
+	print *, p1
+	print *, t2
+
+	p1 = 10
+	print *, p1
+	print *, t2
+
+end program pointerExample
