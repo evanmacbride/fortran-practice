@@ -1,28 +1,31 @@
-program ifProg
+program whereStatement
 implicit none
 
-	real, dimension(5) :: marks
-	real :: avg, sum
-	integer :: n
-	!character(len = 16) :: name
-	marks = (/90.1,48.5,70.3,88.4,51.7/)
-	!name = "Buhhh"
-	!integer :: bleh
-	!bleh = 2
-	avg = 0
-	sum = 0
-	do n = 1, size(marks)
-		sum = sum + marks(n)
+	integer :: a(3, 5), i, j
+
+	do i = 1, 3
+		do j = 1, 5
+			a(i, j) = j - i
+		end do
 	end do
-	avg = sum / size(marks)
-	print *, "AVERAGE: ", avg
-	!gr: if (marks > 90.0) then
-	!	do n = 1, 10
-	!		marks = marks + 1
-	!		name = trim(name)//trim(name)
-	!		print *, name
-	!	end do
-	!else
-	!	print *, "Complete Failure"
-	!end if gr
-end program ifProg
+
+	print *, "ARRAY A:"
+
+	do i = lbound(a, 1), ubound(a, 1)
+		write(*, *) (a(i, j), j = lbound(a, 2), ubound(a, 2))
+	end do
+
+	where (a < 0)
+		a = 1
+	elsewhere (a == 0)
+		a = 5
+	elsewhere
+		a = 99
+	end where
+
+	print *, "NEW ARRAY A:"
+	do i = lbound(a, 1), ubound(a, 1)
+		write(*, *) (a(i, j), j = lbound(a, 2), ubound(a, 2))
+	end do
+
+end program whereStatement
