@@ -13,8 +13,13 @@ IMPLICIT NONE
     n = n + 1.0
   END DO
 
-  avg = sum_x / n
-  std_dev = SQRT((n*sum_x2 - sum_x**2) / (n * (n - 1)))
+  SELECT CASE(INT(n))
+  CASE(0, 1)
+    WRITE(*, *) "You must enter at least two grades."
+  CASE (2:)
+    avg = sum_x / n
+    std_dev = SQRT((n*sum_x2 - sum_x**2) / (n * (n - 1)))
+    WRITE(*, *) "Average: ", avg, "Std. Dev.: ", std_dev
+  END SELECT
 
-  WRITE(*, *) "Average: ", avg, "Std. Dev.: ", std_dev
 END PROGRAM grades
