@@ -1,0 +1,35 @@
+MODULE ran001
+IMPLICIT NONE
+SAVE
+  INTEGER :: n = 9876
+END MODULE ran001
+
+PROGRAM book_rand
+  USE ran001
+  IMPLICIT NONE
+  INTEGER :: i
+  REAL :: r
+
+  CALL SEED(1)
+  DO i = 1, 10
+    CALL random0(r)
+    WRITE(*, 100) r
+    100 FORMAT (F12.6)
+  END DO
+END PROGRAM book_rand
+
+
+SUBROUTINE random0(ran)
+USE ran001
+IMPLICIT NONE
+  REAL, INTENT(OUT) :: ran
+  n = MOD(8121 * n + 28411, 134456)
+  ran = REAL(n) / 134456.
+END SUBROUTINE random0
+
+SUBROUTINE seed(iseed)
+USE ran001
+IMPLICIT NONE
+  INTEGER, INTENT(IN) :: iseed
+  n = ABS(iseed)
+END SUBROUTINE seed
