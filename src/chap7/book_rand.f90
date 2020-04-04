@@ -7,17 +7,30 @@ END MODULE ran001
 PROGRAM book_rand
   USE ran001
   IMPLICIT NONE
-  INTEGER :: i
-  REAL :: r
+  INTEGER :: i, j, iseed
+  REAL :: r, avg, sum
 
-  CALL SEED(1)
+  WRITE(*, *) "Ten random numbers produced by random0:"
   DO i = 1, 10
     CALL random0(r)
     WRITE(*, 100) r
+  END DO
+
+  DO i = 1, 5
+    WRITE(*, *) "Seed random0 with an integer: "
+    READ(*, *) iseed
+    CALL seed(iseed)
+    avg = 0.0
+    sum = 0.0
+    DO j = 1, 10000
+      CALL random0(r)
+      sum = sum + r
+    END DO
+    avg = sum / 10000.0
+    WRITE(*, 100) avg
     100 FORMAT (F12.6)
   END DO
 END PROGRAM book_rand
-
 
 SUBROUTINE random0(ran)
 USE ran001
