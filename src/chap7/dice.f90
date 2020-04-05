@@ -1,39 +1,46 @@
-! Do I need to have a module that will let the program and the function share
-! a random number? I think this is the same problem I had with my hangman game.
-
-!MODULE share_rand
-!IMPLICIT NONE
-!SAVE
-!  REAL :: r
-!END MODULE share_rand
-
-INTEGER FUNCTION roll_die()
-!USE share_rand
+MODULE ran001
 IMPLICIT NONE
-  !INTEGER, INTENT(IN) :: j
-  !r = RAND()
-  roll_die = CEILING(RAND() * 6)
-  !roll_die = j
-END FUNCTION roll_die
+SAVE
+  INTEGER :: n = 9876
+END MODULE ran001
 
 PROGRAM dice
-!USE share_rand
 IMPLICIT NONE
-  INTEGER :: i, iseed, throw
+  INTEGER :: i, iseed, sum = 0, roll
   INTEGER :: roll_die
-  REAL :: r
+  REAL :: r, avg
   WRITE(*, *) "Enter a number to seed the random generator:"
   READ(*, *) iseed
+  WRITE(*, *) "Rolling the dice..."
 
-  CALL SRAND(iseed)
-  DO i = 1, 10
-    r = RAND()
-    WRITE(*, '(I4)') CEILING(r * 6)
+  CALL seed(iseed)
+  DO i = 1, 10000
+    roll = roll_die()
+    WRITE(*, '(I4)') roll
+    sum = sum + roll
   END DO
+  WRITE(*, *) "Roll average: ", REAL(sum) / 10000.0
 
-  CALL SRAND(iseed)
-  DO i = 1, 10
-    !throw = roll_die(2)
-    WRITE(*, '(I4)') roll_die()
-  END DO
 END PROGRAM dice
+
+INTEGER FUNCTION roll_die()
+IMPLICIT NONE
+  REAL :: r
+  CALL random0(r)
+  roll_die = CEILING(r * 6)
+END FUNCTION roll_die
+
+SUBROUTINE random0(ran)
+USE ran001
+IMPLICIT NONE
+  REAL, INTENT(OUT) :: ran
+  n = MOD(8121 * n + 28411, 134456)
+  ran = REAL(n) / 134456.
+END SUBROUTINE random0
+
+SUBROUTINE seed(iseed)
+USE ran001
+IMPLICIT NONE
+  INTEGER, INTENT(IN) :: iseed
+  n = ABS(iseed)
+END SUBROUTINE seed
