@@ -9,9 +9,12 @@ IMPLICIT NONE
   INTEGER :: i
   REAL :: prob
 
+  !WRITE(*, '(2X,A,2X,A)') "People", "Shared B-Day Prob"
+  !WRITE(*, '(2X,A,2X,A)') "------", "-----------------"
   DO i = 2, MAX_PEOPLE
     prob = get_probability(birthday_list, i)
-    WRITE(*, *) i, prob
+    WRITE(*, 100) i, prob
+    100 FORMAT (I8, 2X, F17.6)
   END DO
 
 END PROGRAM birthdays
