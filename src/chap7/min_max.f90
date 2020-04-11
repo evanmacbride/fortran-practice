@@ -48,7 +48,7 @@ END SUBROUTINE find_min_max
 REAL FUNCTION func_a(r)
 IMPLICIT NONE
   REAL, INTENT(IN) :: r
-  func_a = SIN(r) * r
+  func_a = r**3 - 5 * r**2 + 5 * r + 2
 END FUNCTION func_a
 
 REAL FUNCTION func_b(r)
