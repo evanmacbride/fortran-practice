@@ -1,7 +1,7 @@
 ! Write a 100x100 matrix of random real numbers to a file.
 PROGRAM write_data
 IMPLICIT NONE
-  INTEGER, PARAMETER :: ROWS = 2, COLS = 3
+  INTEGER, PARAMETER :: ROWS = 100, COLS = 100
   INTEGER, DIMENSION(8) :: time
   INTEGER :: i, j
   CHARACTER(LEN=3) :: col_str
