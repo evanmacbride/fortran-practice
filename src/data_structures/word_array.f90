@@ -2,9 +2,9 @@ PROGRAM word_array
 IMPLICIT NONE
 CHARACTER(len=80) :: msg
 INTEGER :: status
-CHARACTER(len=16) :: word ! 45 is the length of the longest dictionary word
-CHARACTER(len=16), DIMENSION(5000) :: words
-CHARACTER(len=16), DIMENSION(16,900) :: length_dict
+CHARACTER(len=16) :: word ! 16 is the length of the longest word in our file
+CHARACTER(len=16), DIMENSION(5000) :: words ! There's 5000 words in our file
+CHARACTER(len=16), DIMENSION(16,900) :: length_dict ! 900 is the most there is of any single word length
 INTEGER, DIMENSION(16) :: counters
 INTEGER :: i, j
 LOGICAL :: done_length
