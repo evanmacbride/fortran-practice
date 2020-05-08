@@ -44,9 +44,9 @@ END PROGRAM sort4
 SUBROUTINE sortc(array, n)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
-CHARACTER(len=20), DIMENSION(n), INTENT(INOUT) :: array
+CHARACTER(len=*), DIMENSION(n), INTENT(INOUT) :: array
 INTEGER :: i, iptr, j
-CHARACTER(len=20) :: temp
+CHARACTER(len=LEN(array)) :: temp
 
 
 outer: DO i = 1, n - 1
