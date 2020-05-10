@@ -39,7 +39,7 @@ ELSE
   counters = counters - 1
   ! Write random words at each available length between 2 and 14
   CALL SYSTEM_CLOCK(j)
-  CALL SRAND(j**2 - j)
+  CALL SRAND((j + 1)**2)
   DO i = 2, 14
     IF (counters(i) == 0) THEN
       CYCLE
