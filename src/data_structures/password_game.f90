@@ -1,7 +1,7 @@
 MODULE word_help
 IMPLICIT NONE
 ! The number of words similar to the secret word
-INTEGER, PARAMETER :: MAX_SIMILAR = 4
+INTEGER, PARAMETER :: MAX_SIMILAR = 3
 ! Store words from a word list, organized by length. 900 is the most there is of
 ! any single word length in the word list being used.
 CHARACTER(len=16), DIMENSION(16,900) :: length_dict
@@ -40,11 +40,20 @@ CONTAINS
   CHARACTER(len=*), INTENT(OUT) :: w
   INTEGER :: i, j
   i = LEN_TRIM(w)
-  CALL SYSTEM_CLOCK(j)
-  CALL SRAND((j + 1)**2)
   j =  CEILING(RAND() * counters(i))
   w = TRIM(length_dict(i, j))
   END SUBROUTINE get_rand_word
+
+  ! Keep getting a random word until it doesn't match a given word
+  SUBROUTINE get_decoy_word(d, w)
+  IMPLICIT NONE
+  CHARACTER(len=*), INTENT(OUT) :: d
+  CHARACTER(len=*), INTENT(IN) :: w
+  DO
+    CALL get_rand_word(d)
+    IF (d /= w) EXIT
+  END DO
+  END SUBROUTINE get_decoy_word
 
   ! Get words that are similar to a given word
   SUBROUTINE get_similar(w, sim)
@@ -74,7 +83,7 @@ CONTAINS
       IF (same == LEN(w) - i) THEN
         sim(found + 1) = candidate
         found = found + 1
-        WRITE(*, *) candidate, LEN(w) - i
+        !WRITE(*, *) candidate, LEN(w) - i
         IF (LEN(w) - i > 1) EXIT
       END IF
       IF (found == MAX_SIMILAR) EXIT
@@ -83,22 +92,81 @@ CONTAINS
   END DO
   END SUBROUTINE get_similar
 
+  SUBROUTINE shuffle(arr)
+  IMPLICIT NONE
+  CHARACTER(len=*), DIMENSION(:), INTENT(INOUT) :: arr
+  CHARACTER(len=LEN(arr(1))) :: temp
+  INTEGER :: i, r
+  !WRITE(*, '(5A8)') (arr(i), i = 1, SIZE(arr))
+  DO i = 1, SIZE(arr)
+    !WRITE(*, *) arr(i)
+    r = CEILING(RAND() * (MAX_SIMILAR + 2))
+    temp = arr(i)
+    arr(i) = arr(r)
+    arr(r) = temp
+    !WRITE(*, *)
+  END DO
+  !WRITE(*, '(5A8)') (arr(i), i = 1, SIZE(arr))
+  END SUBROUTINE
+
 END MODULE word_help
 
 PROGRAM password_game
 USE word_help
 IMPLICIT NONE
-INTEGER :: n
-CHARACTER(len=:), ALLOCATABLE :: w ! The secret word
+INTEGER, PARAMETER :: MAX_ATTEMPTS = 3
+INTEGER :: i, j, n, offset, level
+CHARACTER(len=:), ALLOCATABLE :: w, decoy, guess ! The secret word, decoy, and player guess
 CHARACTER(len=:), ALLOCATABLE :: s(:) ! Words that are similar to the secret word
-
-WRITE(*, *) "Enter a word length between 2 and 14"
-READ(*, *) n
-ALLOCATE(CHARACTER(len=n) :: w)
-ALLOCATE(CHARACTER(len=n) :: s(MAX_SIMILAR))
-CALL load_words()
-CALL get_rand_word(w)
-WRITE(*, '(A,I3,A,1X,A)') "Random word of length", n, ":", w
-CALL get_similar(w, s)
-WRITE(*, *) "Similar: ", s
+CHARACTER(len=:), ALLOCATABLE :: game_words(:) ! The secret word, similar words, and a decoy
+LOGICAL :: locked ! The fail state of the game
+CALL SYSTEM_CLOCK(i)
+CALL SRAND((i + 1)**2)
+offset = -1
+level = -1
+DO
+  IF (locked) EXIT
+  offset = MOD(offset + 1, 3)
+  n = offset + 5
+  level = level + 1
+  !WRITE(*, *) "Enter a word length between 2 and 14"
+  !READ(*, *) n
+  IF (ALLOCATED(w)) DEALLOCATE(w)
+  IF (ALLOCATED(decoy)) DEALLOCATE(decoy)
+  IF (ALLOCATED(guess)) DEALLOCATE(guess)
+  IF (ALLOCATED(s)) DEALLOCATE(s)
+  IF (ALLOCATED(game_words)) DEALLOCATE(game_words)
+  ALLOCATE(CHARACTER(len=n) :: w, decoy, guess)
+  ALLOCATE(CHARACTER(len=n) :: s(MAX_SIMILAR))
+  ALLOCATE(CHARACTER(len=n) :: game_words(MAX_SIMILAR + 2))
+  CALL load_words()
+  CALL get_rand_word(w)
+  CALL get_decoy_word(decoy, w)
+  !WRITE(*, '(A,I3,A,1X,A)') "Random word of length", n, ":", w
+  CALL get_similar(w, s)
+  game_words(1) = w
+  game_words(2) = decoy
+  game_words(3:MAX_SIMILAR + 2) = s
+  CALL shuffle(game_words)
+  !WRITE(*, *) "Similar: ", s
+  DO i = 1, MAX_ATTEMPTS
+    WRITE(*, '(A, I4)') "SECURITY LEVEL: ", level
+    WRITE(*, '(5A8)') (game_words(j), j = 1, SIZE(game_words))
+    WRITE(*, '(2A)') NEW_LINE(' '), "USERNAME: ADMIN"
+    WRITE(*, '(A)') "PASSWORD: "
+    READ(*, *) guess
+    IF (guess == w) THEN
+      WRITE(*, '(A)') "ACCESS GRANTED"
+      EXIT
+    ELSE
+      IF (i /= MAX_ATTEMPTS) THEN
+        WRITE(*, '(A, I2)') "ACCESS DENIED. ATTEMPTS REMAINING: ", MAX_ATTEMPTS - i
+      ELSE
+        WRITE(*, '(A)') "ACCESS DENIED. SYSTEM LOCKED."
+        locked = .TRUE.
+      END IF
+    END IF
+    !WRITE(*, *) "PASSWORD = ", w, " DECOY = ", decoy
+  END DO
+END DO
 END PROGRAM password_game
