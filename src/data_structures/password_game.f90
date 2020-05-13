@@ -1,7 +1,8 @@
-MODULE word_help
+MODULE word_tools
 IMPLICIT NONE
 ! The number of words similar to the secret word
 INTEGER, PARAMETER :: MAX_SIMILAR = 3
+INTEGER, PARAMETER :: MAX_LINE_LENGTH = 65
 ! Store words from a word list, organized by length. 900 is the most there is of
 ! any single word length in the word list being used.
 CHARACTER(len=16), DIMENSION(16,900) :: length_dict
@@ -45,21 +46,36 @@ CONTAINS
   END SUBROUTINE get_rand_word
 
   ! Keep getting a random word until it doesn't match a given word
-  SUBROUTINE get_decoy_word(d, w)
+  SUBROUTINE get_decoy_word(d, sim)
   IMPLICIT NONE
   CHARACTER(len=*), INTENT(OUT) :: d
-  CHARACTER(len=*), INTENT(IN) :: w
+  CHARACTER(len=*), DIMENSION(MAX_SIMILAR), INTENT(IN) :: sim
   DO
     CALL get_rand_word(d)
-    IF (d /= w) EXIT
+    !IF (d /= w) EXIT
+    IF (ALL(sim /= d)) EXIT
   END DO
   END SUBROUTINE get_decoy_word
+
+  ! Count the number of letters in a guess that were at the correct position
+  SUBROUTINE count_correct(g, w, c)
+  IMPLICIT NONE
+  CHARACTER(len=*), INTENT(IN) :: g, w ! The user's guess and the secret word
+  INTEGER, INTENT(OUT) :: c ! The number of correct letters
+  INTEGER :: i
+  c = 0
+  DO i = 1, LEN(w)
+    IF (g(i:i) == w(i:i)) THEN
+      c = c + 1
+    END IF
+  END DO
+  END SUBROUTINE count_correct
 
   ! Get words that are similar to a given word
   SUBROUTINE get_similar(w, sim)
   IMPLICIT NONE
   CHARACTER(len=*), INTENT(IN) :: w
-  CHARACTER(len=LEN(w)), DIMENSION(LEN(w)-1), INTENT(OUT) :: sim
+  CHARACTER(len=LEN(w)), DIMENSION(MAX_SIMILAR), INTENT(OUT) :: sim
   CHARACTER(len=LEN(w)) :: candidate
   INTEGER :: i, j, k, l, same, found
   found = 0
@@ -109,13 +125,29 @@ CONTAINS
   !WRITE(*, '(5A8)') (arr(i), i = 1, SIZE(arr))
   END SUBROUTINE
 
-END MODULE word_help
+  ! Convert a string into gibberish. Uses most printable characters in the basic
+  ! Latin set.
+  SUBROUTINE gib(str)
+  IMPLICIT NONE
+  CHARACTER(len=*), INTENT(OUT) :: str
+  INTEGER :: i
+  DO i = 1, LEN(str)
+    str(i:i) = ACHAR(CEILING(RAND() * 95) + 31)
+  END DO
+  END SUBROUTINE gib
+
+  SUBROUTINE print_play_field()
+  IMPLICIT NONE
+  !CHARACTER(len=MAX_LINE_LENGTH), DIMENSION()
+  END SUBROUTINE print_play_field
+
+END MODULE word_tools
 
 PROGRAM password_game
-USE word_help
+USE word_tools
 IMPLICIT NONE
 INTEGER, PARAMETER :: MAX_ATTEMPTS = 3
-INTEGER :: i, j, n, offset, level
+INTEGER :: i, j, n, offset, level, correct
 CHARACTER(len=:), ALLOCATABLE :: w, decoy, guess ! The secret word, decoy, and player guess
 CHARACTER(len=:), ALLOCATABLE :: s(:) ! Words that are similar to the secret word
 CHARACTER(len=:), ALLOCATABLE :: game_words(:) ! The secret word, similar words, and a decoy
@@ -141,7 +173,7 @@ DO
   ALLOCATE(CHARACTER(len=n) :: game_words(MAX_SIMILAR + 2))
   CALL load_words()
   CALL get_rand_word(w)
-  CALL get_decoy_word(decoy, w)
+  CALL get_decoy_word(decoy, s)
   !WRITE(*, '(A,I3,A,1X,A)') "Random word of length", n, ":", w
   CALL get_similar(w, s)
   game_words(1) = w
@@ -150,11 +182,14 @@ DO
   CALL shuffle(game_words)
   !WRITE(*, *) "Similar: ", s
   DO i = 1, MAX_ATTEMPTS
-    WRITE(*, '(A, I4)') "SECURITY LEVEL: ", level
+    WRITE(*, '(A, I3)') "SECURITY LEVEL:", level
     WRITE(*, '(5A8)') (game_words(j), j = 1, SIZE(game_words))
     WRITE(*, '(2A)') NEW_LINE(' '), "USERNAME: ADMIN"
     WRITE(*, '(A)') "PASSWORD: "
     READ(*, *) guess
+    !CALL SLEEP(1)
+    CALL count_correct(guess, w, correct)
+    WRITE(*, '(A,I2,1X,A,I2)') "MATCH:", correct, "/", n
     IF (guess == w) THEN
       WRITE(*, '(A)') "ACCESS GRANTED"
       EXIT
