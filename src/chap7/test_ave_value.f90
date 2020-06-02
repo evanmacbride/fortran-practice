@@ -28,5 +28,6 @@ END PROGRAM test_ave_value
 REAL FUNCTION my_function(x)
 IMPLICIT NONE
   REAL, INTENT(IN) :: x
-  my_function = SIN(X)**2
+  !my_function = SIN(X)**2
+  my_function = 2.
 END FUNCTION my_function
