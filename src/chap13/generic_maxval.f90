@@ -1,0 +1,41 @@
+!584
+MODULE maxval_mod
+USE iso_Fortran_env
+INTERFACE maxval
+  SUBROUTINE maxvali(arr, n, max)
+  IMPLICIT NONE
+  INTEGER, DIMENSION(n), INTENT(IN) :: arr
+  INTEGER, INTENT(IN) :: n
+  INTEGER, INTENT(OUT) :: max
+  END SUBROUTINE maxvali
+
+  SUBROUTINE maxvalr(arr, n, max)
+  IMPORT
+  IMPLICIT NONE
+  REAL(KIND=REAL32), DIMENSION(n), INTENT(IN) :: arr
+  INTEGER, INTENT(IN) :: n
+  REAL(KIND=REAL32), INTENT(OUT) :: max
+  END SUBROUTINE maxvalr
+
+  SUBROUTINE maxvald(arr, n, max)
+  IMPORT
+  IMPLICIT NONE
+  REAL(KIND=REAL64), DIMENSION(n), INTENT(IN) :: arr
+  INTEGER, INTENT(IN) :: n
+  REAL(KIND=REAL64), INTENT(OUT) :: max
+  END SUBROUTINE maxvald
+
+  SUBROUTINE maxvalc(arr, n, max)
+  IMPLICIT NONE
+  COMPLEX, DIMENSION(n), INTENT(IN) :: arr
+  INTEGER, INTENT(IN) :: n
+  COMPLEX, INTENT(OUT) :: max
+  END SUBROUTINE maxvalc
+END INTERFACE maxval
+END MODULE maxval_mod
+
+PROGRAM generic_maxval
+USE maxval_mod
+IMPLICIT NONE
+
+END PROGRAM generic_maxval
