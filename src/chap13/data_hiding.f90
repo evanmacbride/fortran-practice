@@ -5,7 +5,7 @@ MODULE vector_operators
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: vector, ASSIGNMENT(=), OPERATOR(+), OPERATOR(-), OPERATOR(*), &
-          OPERATOR(/), OPERATOR(.DOT.)
+          OPERATOR(/), OPERATOR(.DOT.), signal_me
 TYPE :: vector
   !PRIVATE
   REAL :: x
@@ -13,6 +13,7 @@ TYPE :: vector
   REAL :: z
 END TYPE vector
 CHARACTER(LEN=20), PUBLIC :: hello = "HELLO WORLD"
+INTEGER, PUBLIC, PROTECTED :: signal = 29
 
 INTERFACE OPERATOR(+)
   MODULE PROCEDURE add_vectors
@@ -41,6 +42,12 @@ INTERFACE ASSIGNMENT(=)
 END INTERFACE
 
 CONTAINS
+  INTEGER FUNCTION signal_me()
+  IMPLICIT NONE
+  signal = 33
+  signal_me = signal
+  END FUNCTION signal_me
+
   TYPE(vector) FUNCTION add_vectors(v1, v2)
   IMPLICIT NONE
   TYPE(vector), INTENT(IN) :: v1, v2
@@ -104,12 +111,14 @@ IMPLICIT NONE
 TYPE(vector) :: u, v
 REAL :: s
 REAL, DIMENSION(3) :: a
+
 a = [7., 8., 9.]
 s = 2
+!greet = hello
 !u = vector(1., 2., 3.)
 !v = vector(4., 5., 4.)
 u = [1., 2., 3.]
-v = [4., 5., 4]
+v = [4., 5., 4.]
 WRITE(*, *) u + v
 WRITE(*, *) u * s
 WRITE(*, *) v / 3.
@@ -118,5 +127,6 @@ v = a
 WRITE(*, *) v
 a = u
 WRITE(*, *) a
-WRITE(*, *) hello
+!signal = 55
+WRITE(*, *) signal_me()
 END PROGRAM test_vector_operators
